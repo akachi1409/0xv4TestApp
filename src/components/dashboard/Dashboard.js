@@ -152,12 +152,12 @@ class Dashboard extends Component {
       s: '0x0000000000000000000000000000000000000000000000000000006d6168616d'
     };
 
-    // await instance1.methods.approve(ERC721OrderFeatureAddress, this.state.sellNFTId).send({
-    //   from : this.state.account
-    // });
-    // await instance.methods.sellERC721(order, signature, order.erc721TokenId, false, "0x").send({
-    //   from : this.state.account
-    // });
+    await instance1.methods.approve(ERC721OrderFeatureAddress, this.state.sellNFTId).send({
+      from : this.state.account
+    });
+    await instance.methods.sellERC721(order, signature, order.erc721TokenId, false, "0x").send({
+      from : this.state.account
+    });
   }
 
   setMintNFTId = (mintNFTId) => {console.log(mintNFTId); this.setState({mintNFTId});}
@@ -173,7 +173,7 @@ class Dashboard extends Component {
   setSellNFTId = (sellNFTId) => {this.setState({sellNFTId});}
 
   setBuyOrderMaker = (buyOrderMaker) => {this.setState({buyOrderMaker});}
-  
+
   setBuyOrderAmount = (buyOrderAmount) => {this.setState({buyOrderAmount});}
 
   render() {
