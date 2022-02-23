@@ -90,6 +90,8 @@ class Dashboard extends Component {
     const instance2 = new web3.eth.Contract(tokenABI, TokenContractAddress);
     console.log(instance2);
 
+    var totalFee = 10;
+
     const order = {
       direction : 1,
       maker : this.state.account,
@@ -97,10 +99,10 @@ class Dashboard extends Component {
       expiry : 2222222222,
       nonce : 11,
       erc20Token : TokenContractAddress,
-      erc20TokenAmount : this.state.buyTokenValue / 10 * 9,
+      erc20TokenAmount : this.state.buyTokenValue / 100 * 105,
       fees : [{
         recipient: marketOwner,
-        amount: this.state.buyTokenValue / 10,
+        amount: this.state.buyTokenValue / 105 * 10,
         feeData: "0x",
       }],
       erc721Token : NFTContractAddress,
@@ -110,7 +112,7 @@ class Dashboard extends Component {
 
     console.log(order);
 
-    await instance2.methods.approve(ERC721OrderFeatureAddress, this.state.buyTokenValue).send({
+    await instance2.methods.approve(ERC721OrderFeatureAddress, this.state.buyTokenValue / 100 * 105).send({
       from : this.state.account
     });
 
@@ -134,10 +136,10 @@ class Dashboard extends Component {
       expiry : 2222222222,
       nonce : 11,
       erc20Token : TokenContractAddress,
-      erc20TokenAmount : this.state.buyOrderAmount / 10 * 9,
+      erc20TokenAmount : this.state.buyTokenValue / 100 * 105,
       fees : [{
         recipient: marketOwner,
-        amount: this.state.buyOrderAmount / 10,
+        amount: this.state.buyTokenValue / 105 * 10,
         feeData: "0x",
       }],
       erc721Token : NFTContractAddress,
