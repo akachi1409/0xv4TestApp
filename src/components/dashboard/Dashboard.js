@@ -129,7 +129,7 @@ class Dashboard extends Component {
 
     const order = {
       direction : 1,
-      maker : this.state.buyOrderMaker,
+      maker : '0x1F4dE329818D2800cc32162D352DeD932DD34438',
       taker : this.state.account,
       expiry : 2222222222,
       nonce : 11,
@@ -144,6 +144,7 @@ class Dashboard extends Component {
       erc721TokenId : this.state.sellNFTId,
       erc721TokenProperties : []
     }
+
     console.log(order);
     const signature = {
       signatureType: 4,
@@ -152,12 +153,16 @@ class Dashboard extends Component {
       s: '0x0000000000000000000000000000000000000000000000000000006d6168616d'
     };
 
-    await instance1.methods.approve(ERC721OrderFeatureAddress, this.state.sellNFTId).send({
+    console.log(this.state.sellNFTId);
+    const res = await instance.methods.validateERC721OrderSignature(order,signature).call();
+    console.log(res);
+    await instance1.methods.approve(ERC721OrderFeatureAddress, order.erc721TokenId).send({
       from : this.state.account
     });
     await instance.methods.sellERC721(order, signature, order.erc721TokenId, false, "0x").send({
       from : this.state.account
     });
+
   }
 
   setMintNFTId = (mintNFTId) => {console.log(mintNFTId); this.setState({mintNFTId});}
