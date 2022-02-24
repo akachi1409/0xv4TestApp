@@ -18,7 +18,7 @@ class Dashboard extends Component {
     sellNFTId : null,
     buyOrderMaker : null,
     buyOrderAmount : null,
-    buyOrderExpiry: null,
+    buyOrderNonce: null,
   }
 
   componentDidMount() {
@@ -90,19 +90,17 @@ class Dashboard extends Component {
     const instance2 = new web3.eth.Contract(tokenABI, TokenContractAddress);
     console.log(instance2);
 
-    var totalFee = 10;
-
     const order = {
       direction : 1,
       maker : this.state.account,
       taker : take,
       expiry : 2222222222,
-      nonce : 11,
+      nonce : Math.floor(Math.random() * 10000),
       erc20Token : TokenContractAddress,
-      erc20TokenAmount : this.state.buyTokenValue / 100 * 105,
+      erc20TokenAmount : Math.floor(this.state.buyTokenValue / 100 * 95),
       fees : [{
         recipient: marketOwner,
-        amount: this.state.buyTokenValue / 105 * 10,
+        amount: Math.floor(this.state.buyTokenValue / 105 * 10),
         feeData: "0x",
       }],
       erc721Token : NFTContractAddress,
@@ -110,9 +108,10 @@ class Dashboard extends Component {
       erc721TokenProperties : []
     }
 
+    console.log("You need to pay ",Math.floor(this.state.buyTokenValue / 100 * 105),"because of fee.");
     console.log(order);
 
-    await instance2.methods.approve(ERC721OrderFeatureAddress, this.state.buyTokenValue / 100 * 105).send({
+    await instance2.methods.approve(ERC721OrderFeatureAddress, Math.floor(this.state.buyTokenValue / 100 * 105)).send({
       from : this.state.account
     });
 
@@ -131,15 +130,15 @@ class Dashboard extends Component {
 
     const order = {
       direction : 1,
-      maker : '0x1F4dE329818D2800cc32162D352DeD932DD34438',
+      maker : this.state.buyOrderMaker,
       taker : this.state.account,
       expiry : 2222222222,
-      nonce : 11,
+      nonce : this.state.buyOrderNonce,
       erc20Token : TokenContractAddress,
-      erc20TokenAmount : this.state.buyTokenValue / 100 * 105,
+      erc20TokenAmount : Math.floor(this.state.buyOrderAmount / 100 * 95),
       fees : [{
         recipient: marketOwner,
-        amount: this.state.buyTokenValue / 105 * 10,
+        amount: Math.floor(this.state.buyOrderAmount / 105 * 10),
         feeData: "0x",
       }],
       erc721Token : NFTContractAddress,
@@ -182,6 +181,8 @@ class Dashboard extends Component {
   setBuyOrderMaker = (buyOrderMaker) => {this.setState({buyOrderMaker});}
 
   setBuyOrderAmount = (buyOrderAmount) => {this.setState({buyOrderAmount});}
+
+  setBuyOrderNonce = (buyOrderNonce) => {this.setState({buyOrderNonce});}
 
   render() {
     return (
@@ -230,6 +231,7 @@ class Dashboard extends Component {
           </Alert>
           <input placeholder="Maker"  style={{marginLeft:'50px'}} onChange={(e) => this.setBuyOrderMaker(e.target.value)} />
           <input placeholder="NFT ID"  style={{marginLeft:'50px'}} onChange={(e) => this.setSellNFTId(e.target.value)} />
+          <input placeholder="Buy Order nonce"  style={{marginLeft:'50px'}} onChange={(e) => this.setBuyOrderNonce(e.target.value)} />
           <input placeholder="Amount of token" type = "number" style={{marginLeft:'50px'}} onChange={(e) => this.setBuyOrderAmount(e.target.value)} />
           <Button  style={{marginLeft:'50px'}} onClick = {this.confirmSell}>Sell</Button>
         </div>
