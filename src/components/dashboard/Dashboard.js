@@ -71,7 +71,7 @@ class Dashboard extends Component {
     var web3 = new Web3(window.ethereum);
     const instance = new web3.eth.Contract(tokenABI, TokenContractAddress);
     console.log(instance,this.state.account, this.state.tranTokenValue);
-    const res = await instance.methods.transfer(this.state.toAddress, this.state.tranTokenValue).send({
+    const res = await instance.methods.transfer(this.state.toAddress, web3.utils.toWei(this.state.tranTokenValue)).send({
       from: this.state.account
     });
     console.log(res)   
@@ -90,6 +90,8 @@ class Dashboard extends Component {
     const instance2 = new web3.eth.Contract(tokenABI, TokenContractAddress);
     console.log(instance2);
 
+    var buyTokenValue = this.state.buyTokenValue;
+    
     const order = {
       direction : 1,
       maker : this.state.account,
@@ -97,10 +99,10 @@ class Dashboard extends Component {
       expiry : 2222222222,
       nonce : Math.floor(Math.random() * 10000),
       erc20Token : TokenContractAddress,
-      erc20TokenAmount : Math.floor(this.state.buyTokenValue / 100 * 95),
+      erc20TokenAmount : web3.utils.toWei(String(buyTokenValue * 95 / 100)),
       fees : [{
         recipient: marketOwner,
-        amount: Math.floor(this.state.buyTokenValue / 105 * 10),
+        amount: web3.utils.toWei(String(buyTokenValue * 10 / 100)),
         feeData: "0x",
       }],
       erc721Token : NFTContractAddress,
@@ -108,10 +110,10 @@ class Dashboard extends Component {
       erc721TokenProperties : []
     }
 
-    console.log("You need to pay ",Math.floor(this.state.buyTokenValue / 100 * 105),"because of fee.");
+    console.log("You need to pay ",web3.utils.toWei(String(buyTokenValue * 105 / 100)),"because of fee.");
     console.log(order);
 
-    await instance2.methods.approve(ERC721OrderFeatureAddress, Math.floor(this.state.buyTokenValue / 100 * 105)).send({
+    await instance2.methods.approve(ERC721OrderFeatureAddress, web3.utils.toWei(String(buyTokenValue * 105 / 100))).send({
       from : this.state.account
     });
 
@@ -135,10 +137,10 @@ class Dashboard extends Component {
       expiry : 2222222222,
       nonce : this.state.buyOrderNonce,
       erc20Token : TokenContractAddress,
-      erc20TokenAmount : Math.floor(this.state.buyOrderAmount / 100 * 95),
+      erc20TokenAmount : web3.utils.toWei(String(this.state.buyOrderAmount * 95 / 100)),
       fees : [{
         recipient: marketOwner,
-        amount: Math.floor(this.state.buyOrderAmount / 105 * 10),
+        amount: web3.utils.toWei(String(this.state.buyOrderAmount * 10 / 100)),
         feeData: "0x",
       }],
       erc721Token : NFTContractAddress,
@@ -163,7 +165,6 @@ class Dashboard extends Component {
     await instance.methods.sellERC721(order, signature, order.erc721TokenId, false, "0x").send({
       from : this.state.account
     });
-
   }
 
   setMintNFTId = (mintNFTId) => {console.log(mintNFTId); this.setState({mintNFTId});}
@@ -174,13 +175,13 @@ class Dashboard extends Component {
 
   setBuyNFTId = (buyNFTId) => {this.setState({buyNFTId});}
 
-  setBuyTokenValue = (buyTokenValue) => {this.setState({buyTokenValue});}
+  setBuyTokenValue = (buyTokenValue) => {this.setState({buyTokenValue: parseInt(buyTokenValue)});}
 
   setSellNFTId = (sellNFTId) => {this.setState({sellNFTId});}
 
   setBuyOrderMaker = (buyOrderMaker) => {this.setState({buyOrderMaker});}
 
-  setBuyOrderAmount = (buyOrderAmount) => {this.setState({buyOrderAmount});}
+  setBuyOrderAmount = (buyOrderAmount) => {this.setState({buyOrderAmount: parseInt(buyOrderAmount)});}
 
   setBuyOrderNonce = (buyOrderNonce) => {this.setState({buyOrderNonce});}
 
@@ -219,7 +220,7 @@ class Dashboard extends Component {
             </p>
           </Alert>
           <input placeholder="NFT ID"  style={{marginLeft:'50px'}} onChange={(e) => this.setBuyNFTId(e.target.value)} />
-          <input placeholder="amount of token"  style={{marginLeft:'50px'}} onChange={(e) => this.setBuyTokenValue(e.target.value)} />
+          <input placeholder="amount of token"  type = "number" style={{marginLeft:'50px'}} onChange={(e) => this.setBuyTokenValue(e.target.value)} />
           <Button  style={{marginLeft:'50px'}} onClick = {this.makeBuyOffer} >make buy offer</Button>
         </div>
         <div style={{diaply:'flex',marginTop:'10px'}}>
