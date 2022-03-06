@@ -306,9 +306,9 @@ class Dashboard extends Component {
 
   setBuyOrderNonce = (buyOrderNonce) => {this.setState({buyOrderNonce});}
 
-  setSellOrderNFTId = (sellOrderNFTId) => {this.setState({sellOrderNFTId});console.log(sellOrderNFTId)}
+  setSellOrderNFTId = (sellOrderNFTId) => {this.setState({sellOrderNFTId});}
 
-  setSellOrderEtherValue = (sellEtherOrderValue) => {this.setState({sellEtherOrderValue});console.log(sellEtherOrderValue)}
+  setSellOrderEtherValue = (sellEtherOrderValue) => {this.setState({sellEtherOrderValue});}
 
   setForConfirmSellOrderNFTId = (forConfirmSellOrderNftId) => {this.setState({forConfirmSellOrderNftId});}
 
