@@ -65,11 +65,43 @@ class Dashboard extends Component {
     // console.log(this.state.mintNFTId, this.state.toAddress,this.state.tranTokenValue,this.state.buyNFTId,this.state.buyTokenValue,this.state.sellNFTId);
     var web3 = new Web3(window.ethereum);
     const instance = new web3.eth.Contract(NFTabi, NFTContractAddress);
-    console.log(instance,this.state.account, this.state.mintNFTId);
-    const res = await instance.methods.safeMint(this.state.account, this.state.mintNFTId).send({
-      from: this.state.account
+
+    const instance1 = new web3.eth.Contract(ERC721OrderFeatureABI, ERC721OrderFeatureAddress);
+
+    // console.log(instance,this.state.account, this.state.mintNFTId);
+    // const res = await instance.methods.safeMint(this.state.account, this.state.mintNFTId).send({
+    //   from: this.state.account
+    // });
+    // console.log(res)
+    const utils = require('@0x/protocol-utils');
+    const order = new utils.ERC721Order({
+      direction : 1,
+      maker : "0x1F4dE329818D2800cc32162D352DeD932DD34438",
+      taker : this.state.account,
+      expiry : 2222222222,
+      nonce : 11,
+      erc20Token : TokenContractAddress,
+      erc20TokenAmount : web3.utils.toWei(String(100 * 95 / 100)),
+      fees : [{
+        recipient: marketOwner,
+        amount: web3.utils.toWei(String(100 * 10 / 100)),
+        feeData: "0x",
+      }],
+      erc721Token : NFTContractAddress,
+      erc721TokenId : 0,
+      erc721TokenProperties : [],
+      chainId: 3,
     });
-    console.log(res)
+    console.log(order);
+
+    const signature = await order.getSignatureWithProviderAsync(
+      window.ethereum,
+      utils.SignatureType.EIP712,
+      this.state.account
+    );
+    console.log(signature);
+
+    await instance1.methods.validateERC721OrderSignature(order, signature).call();
   }
 
   TransToken = async() => {
@@ -161,7 +193,6 @@ class Dashboard extends Component {
       s: '0x0000000000000000000000000000000000000000000000000000006d6168616d'
     };
 
-    console.log(this.state.sellNFTId);
     const res = await instance.methods.validateERC721OrderSignature(order,signature).call();
     console.log(res);
     await instance1.methods.approve(ERC721OrderFeatureAddress, order.erc721TokenId).send({
@@ -304,7 +335,7 @@ class Dashboard extends Component {
         <div style={{marginTop:'50px',marginLeft : '50px'}}>
           <ConnectButton connect={this.connect} account={this.state.account} />
         </div>
-        <Tabs style={{marginTop:'50px', marginLeft : '10px'}} defaultActiveKey="Selling(ETH)" id="uncontrolled-tab-example" className="mb-3">
+        <Tabs style={{marginTop:'50px', marginLeft : '10px'}} defaultActiveKey="Mint" id="uncontrolled-tab-example" className="mb-3">
           <Tab eventKey="Mint" title="Mint NFT and transfer token">
             <div style={{marginTop:'50px'}}>
               <Alert variant="primary" >
@@ -372,9 +403,9 @@ class Dashboard extends Component {
               You can Buy NFT here. If there's a sell offer for your target NFT ID's NFT and you pay ether you can buy it.
               </p>
             </Alert>
-            <input placeholder="NFT ID 16"  style={{marginLeft:'50px'}} onChange={(e) => this.setForConfirmSellOrderNFTId(e.target.value)} />
-            <input placeholder="Amount of ether 0.1"  type = "number" style={{marginLeft:'50px'}} onChange={(e) => this.setForConfirmSellOrderEtherValue(e.target.value)} />
-            <input placeholder="Sell Order's nonce 5088"  style={{marginLeft:'50px'}} onChange={(e) => this.setForConfirmSellOrderNonce(e.target.value)} />
+            <input placeholder="NFT ID"  style={{marginLeft:'50px'}} onChange={(e) => this.setForConfirmSellOrderNFTId(e.target.value)} />
+            <input placeholder="Amount of ether"  type = "number" style={{marginLeft:'50px'}} onChange={(e) => this.setForConfirmSellOrderEtherValue(e.target.value)} />
+            <input placeholder="Sell Order's nonce"  style={{marginLeft:'50px'}} onChange={(e) => this.setForConfirmSellOrderNonce(e.target.value)} />
             <Button  style={{marginLeft:'50px'}} onClick = {this.confirmSellOfferWithEth} >Buy</Button>
           </div>
           </Tab>
