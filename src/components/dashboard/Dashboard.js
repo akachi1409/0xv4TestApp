@@ -13,6 +13,7 @@ class Dashboard extends Component {
     mintNFTId : null,
     toAddress : null,
     tranTokenValue : null,
+    newMarketAddress : null,
     buyNFTId : null,
     buyTokenValue : null,
     sellNFTId : null,
@@ -68,40 +69,11 @@ class Dashboard extends Component {
 
     const instance1 = new web3.eth.Contract(ERC721OrderFeatureABI, ERC721OrderFeatureAddress);
 
-    // console.log(instance,this.state.account, this.state.mintNFTId);
-    // const res = await instance.methods.safeMint(this.state.account, this.state.mintNFTId).send({
-    //   from: this.state.account
-    // });
-    // console.log(res)
-    const utils = require('@0x/protocol-utils');
-    const order = new utils.ERC721Order({
-      direction : 1,
-      maker : "0x1F4dE329818D2800cc32162D352DeD932DD34438",
-      taker : this.state.account,
-      expiry : 2222222222,
-      nonce : 11,
-      erc20Token : TokenContractAddress,
-      erc20TokenAmount : web3.utils.toWei(String(100 * 95 / 100)),
-      fees : [{
-        recipient: marketOwner,
-        amount: web3.utils.toWei(String(100 * 10 / 100)),
-        feeData: "0x",
-      }],
-      erc721Token : NFTContractAddress,
-      erc721TokenId : 0,
-      erc721TokenProperties : [],
-      chainId: 3,
+    console.log(instance,this.state.account, this.state.mintNFTId);
+    const res = await instance.methods.safeMint(this.state.account, this.state.mintNFTId).send({
+      from: this.state.account
     });
-    console.log(order);
-
-    const signature = await order.getSignatureWithProviderAsync(
-      window.ethereum,
-      utils.SignatureType.EIP712,
-      this.state.account
-    );
-    console.log(signature);
-
-    await instance1.methods.validateERC721OrderSignature(order, signature).call();
+    console.log(res)
   }
 
   TransToken = async() => {
@@ -114,6 +86,14 @@ class Dashboard extends Component {
     console.log(res)   
   }
   
+  setMarketOwner = async () => {    
+    var web3 = new Web3(window.ethereum);
+    const instance = new web3.eth.Contract(ERC721OrderFeatureABI, ERC721OrderFeatureAddress);
+    await instance.methods.setMarketOwner(this.state.newMarketAddress).send({
+      from: this.state.account
+    });
+  }
+
   makeBuyOffer = async() => {
     var web3 = new Web3(window.ethereum);
 
@@ -136,10 +116,10 @@ class Dashboard extends Component {
       expiry : 2222222222,
       nonce : Math.floor(Math.random() * 10000),
       erc20Token : TokenContractAddress,
-      erc20TokenAmount : web3.utils.toWei(String(buyTokenValue * 95 / 100)),
+      erc20TokenAmount : web3.utils.toWei(String(buyTokenValue)),
       fees : [{
         recipient: marketOwner,
-        amount: web3.utils.toWei(String(buyTokenValue * 10 / 100)),
+        amount: 0,
         feeData: "0x",
       }],
       erc721Token : NFTContractAddress,
@@ -147,7 +127,7 @@ class Dashboard extends Component {
       erc721TokenProperties : []
     }
 
-    console.log("You need to pay ",web3.utils.toWei(String(buyTokenValue * 105 / 100)),"because of fee.");
+    console.log("You need to pay ",web3.utils.toWei(String(Math.floor(buyTokenValue * 102.5 / 100))),"because of fee.");
     console.log(order);
 
     await instance2.methods.approve(ERC721OrderFeatureAddress, web3.utils.toWei(String(buyTokenValue * 105 / 100))).send({
@@ -174,10 +154,10 @@ class Dashboard extends Component {
       expiry : 2222222222,
       nonce : this.state.buyOrderNonce,
       erc20Token : TokenContractAddress,
-      erc20TokenAmount : web3.utils.toWei(String(this.state.buyOrderAmount * 95 / 100)),
+      erc20TokenAmount : web3.utils.toWei(String(this.state.buyOrderAmount)),
       fees : [{
         recipient: marketOwner,
-        amount: web3.utils.toWei(String(this.state.buyOrderAmount * 10 / 100)),
+        amount: 0,
         feeData: "0x",
       }],
       erc721Token : NFTContractAddress,
@@ -195,9 +175,11 @@ class Dashboard extends Component {
 
     const res = await instance.methods.validateERC721OrderSignature(order,signature).call();
     console.log(res);
-    await instance1.methods.approve(ERC721OrderFeatureAddress, order.erc721TokenId).send({
-      from : this.state.account
-    });
+
+    // await instance1.methods.approve(ERC721OrderFeatureAddress, order.erc721TokenId).send({
+    //   from : this.state.account
+    // });
+
     await instance.methods.sellERC721(order, signature, order.erc721TokenId, false, "0x").send({
       from : this.state.account
     });
@@ -229,10 +211,10 @@ class Dashboard extends Component {
       expiry : 2222222222,
       nonce : Math.floor(Math.random() * 10000),
       erc20Token : '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
-      erc20TokenAmount : web3.utils.toWei(String(sellEtherOrderValue * 95 / 100)),
+      erc20TokenAmount : web3.utils.toWei(String(sellEtherOrderValue)),
       fees : [{
         recipient: marketOwner,
-        amount: web3.utils.toWei(String(sellEtherOrderValue * 10 / 100)),
+        amount: 0,
         feeData: "0x",
       }],
       erc721Token : NFTContractAddress,
@@ -273,10 +255,10 @@ class Dashboard extends Component {
       expiry : 2222222222,
       nonce : this.state.forConfirmSellOrderNonce,
       erc20Token : '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
-      erc20TokenAmount : web3.utils.toWei(String(forConfirmSellOrderEtherValue * 95 / 100)),
+      erc20TokenAmount : web3.utils.toWei(String(forConfirmSellOrderEtherValue)),
       fees : [{
         recipient: marketOwner,
-        amount: web3.utils.toWei(String(forConfirmSellOrderEtherValue * 10 / 100)),
+        amount: 0,
         feeData: "0x",
       }],
       erc721Token : NFTContractAddress,
@@ -293,7 +275,10 @@ class Dashboard extends Component {
       s: '0x0000000000000000000000000000000000000000000000000000006d6168616d'
     };
 
-    const options = { value: web3.utils.toWei(String(forConfirmSellOrderEtherValue * 105 / 100)) };
+    const res = await instance.methods.validateERC721OrderSignature(order,signature).call();
+    console.log(res);
+
+    const options = { value: web3.utils.toWei(String(forConfirmSellOrderEtherValue * 102.5 / 100)) };
 
     instance.methods.buyERC721(order,signature,"0x").send({
       from : this.state.account,
@@ -306,6 +291,8 @@ class Dashboard extends Component {
   setToAddress = (toAddress) => {this.setState({toAddress});}
 
   setTransTokenValue = (tranTokenValue) => {this.setState({tranTokenValue});}
+
+  setNewMarketAddress = (newMarketAddress) => {this.setState({newMarketAddress});}
 
   setBuyNFTId = (buyNFTId) => {this.setState({buyNFTId});}
 
@@ -335,8 +322,8 @@ class Dashboard extends Component {
         <div style={{marginTop:'50px',marginLeft : '50px'}}>
           <ConnectButton connect={this.connect} account={this.state.account} />
         </div>
-        <Tabs style={{marginTop:'50px', marginLeft : '10px'}} defaultActiveKey="Mint" id="uncontrolled-tab-example" className="mb-3">
-          <Tab eventKey="Mint" title="Mint NFT and transfer token">
+        <Tabs style={{marginTop:'50px', marginLeft : '10px'}} defaultActiveKey="Prepare" id="uncontrolled-tab-example" className="mb-3">
+          <Tab eventKey="Prepare" title="Prepare">
             <div style={{marginTop:'50px'}}>
               <Alert variant="primary" >
                 <p>
@@ -351,12 +338,21 @@ class Dashboard extends Component {
               <Alert variant="primary" >
                 <p>
                   You can transfer V4Tokens here.
-                  You can find the smart contract  <Alert.Link href="https://ropsten.etherscan.io/address/0xB1b5eA1D5946dF58Db50e136C1823BF2ECCFfA05#code">here</Alert.Link>.
+                  You can find the smart contract  <Alert.Link href="https://ropsten.etherscan.io/address/0xE436313CAaaD56D6934AC0A94998a8468602548b#code">here</Alert.Link>.
                 </p>
               </Alert>
               <input placeholder="To address"  style={{marginLeft:'50px'}} onChange={(e) => this.setToAddress(e.target.value)} />
               <input type="number" placeholder="Value"  style={{marginLeft:'50px'}} onChange={(e) => this.setTransTokenValue(e.target.value)}  />
               <Button  style={{marginLeft:'50px'}} onClick = {this.TransToken}>Trans</Button>
+            </div>
+            <div style={{marginTop:'10px'}}>
+              <Alert variant="primary" >
+                <p>
+                  You can set marketOwner here if you are a owner of this contract.
+                </p>
+              </Alert>
+              <input placeholder="New address"  style={{marginLeft:'50px'}} onChange={(e) => this.setNewMarketAddress(e.target.value)} />
+              <Button  style={{marginLeft:'50px'}} onClick = {this.setMarketOwner}>Set</Button>
             </div>
           </Tab>
           <Tab eventKey="Buying" title="Buying">
