@@ -63,17 +63,43 @@ class Dashboard extends Component {
   }
 
   mintNFT = async () => {
-    // console.log(this.state.mintNFTId, this.state.toAddress,this.state.tranTokenValue,this.state.buyNFTId,this.state.buyTokenValue,this.state.sellNFTId);
+    // var web3 = new Web3(window.ethereum);
+    // const instance = new web3.eth.Contract(NFTabi, NFTContractAddress);
+
+    // const instance1 = new web3.eth.Contract(ERC721OrderFeatureABI, ERC721OrderFeatureAddress);
+
+    // console.log(instance,this.state.account, this.state.mintNFTId);
+    // const res = await instance.methods.safeMint(this.state.account, this.state.mintNFTId).send({
+    //   from: this.state.account
+    // });
+    // console.log(res)
+
     var web3 = new Web3(window.ethereum);
-    const instance = new web3.eth.Contract(NFTabi, NFTContractAddress);
+    const instance = new web3.eth.Contract(ERC721OrderFeatureABI, ERC721OrderFeatureAddress);
 
-    const instance1 = new web3.eth.Contract(ERC721OrderFeatureABI, ERC721OrderFeatureAddress);
-
-    console.log(instance,this.state.account, this.state.mintNFTId);
-    const res = await instance.methods.safeMint(this.state.account, this.state.mintNFTId).send({
-      from: this.state.account
+    const utils = require('@0x/protocol-utils');
+    const order = new utils.ERC721Order({
+      direction : 1,
+      maker : "0x1F4dE329818D2800cc32162D352DeD932DD34438",
+      taker : "0xe5d687AAb8769c272547474C59A84EFa83e339ac",
+      expiry : 2222222222,
+      nonce : 100,
+      erc20Token : TokenContractAddress,
+      erc20TokenAmount : web3.utils.toWei('1'),
+      fees : [],
+      erc721Token : NFTContractAddress,
+      erc721TokenId : 2,
+      erc721TokenProperties : [],
+      chainId: 3,
     });
-    console.log(res)
+    
+    const signature = await order.getSignatureWithProviderAsync(
+      window.ethereum,
+      utils.SignatureType.EIP712,
+    );
+    console.log(signature);
+    var result = await instance.methods.validateERC721OrderSignature(order,signature).call();
+    console.log(result);
   }
 
   TransToken = async() => {
